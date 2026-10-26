@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-lint:
+    runs-on: ubuntu-22.04
+    container: ros:humble-ros-base
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: src/fastlio_slam_toolbox_amr
+
+      - name: Install lint tools
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            ros-humble-ament-lint-auto ros-humble-ament-lint-common shellcheck
+
+      # Runtime dependencies (FAST-LIO, Livox driver) are not needed to build this package
+      - name: Build and test
+        shell: bash
+        run: |
+          source /opt/ros/humble/setup.bash
+          colcon build --packages-select fastlio_slam_toolbox_amr
+          colcon test --packages-select fastlio_slam_toolbox_amr --event-handlers console_direct+
+          colcon test-result --verbose
+
+      - name: Shellcheck
+        run: shellcheck src/fastlio_slam_toolbox_amr/scripts/save_map

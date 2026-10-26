@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Saves the running slam_toolbox mapping session (mapping.launch.py):
+#   <path>.pgm / <path>.yaml           occupancy grid for map_server, AMCL, RViz
+#   <path>.posegraph / <path>.data     pose graph for localization.launch.py
+#
+#   ros2 run fastlio_slam_toolbox_amr save_map ~/maps/warehouse
+# A relative path is taken from the current directory, not slam_toolbox's.
+set -o pipefail
+
+if [[ $# -ne 1 || "$1" == -* ]]; then
+    echo "usage: save_map <path/name>   (writes <path/name>.{pgm,yaml,posegraph,data})" >&2
+    exit 1
+fi
+out="$(realpath -m "$1")"
+mkdir -p "$(dirname "$out")" || exit 1
+
+# ros2 service call waits forever for a missing service, so fail fast instead
+if ! ros2 service type /slam_toolbox/save_map > /dev/null 2>&1; then
+    echo "[save_map] /slam_toolbox/save_map not found, is mapping.launch.py running?" >&2
+    exit 1
+fi
+
+if [[ -e "$out.posegraph" || -e "$out.yaml" ]]; then
+    read -r -p "$out.* exists, overwrite? [y/N] " ans
+    [[ "$ans" == [yY] ]] || exit 1
+fi
+
+# ros2 service call exits 0 even when the service reports a failure, so check result=0
+call() {
+    local resp
+    resp="$(ros2 service call "$@")" || { echo "$resp" >&2; return 1; }
+    grep -q "result=0" <<< "$resp" || { echo "$resp" >&2; return 1; }
+}
+
+call /slam_toolbox/save_map slam_toolbox/srv/SaveMap "{name: {data: '$out'}}" ||
+    { echo "[save_map] save_map failed (is /map being published?)" >&2; exit 1; }
+call /slam_toolbox/serialize_map slam_toolbox/srv/SerializePoseGraph "{filename: '$out'}" ||
+    { echo "[save_map] serialize_map failed" >&2; exit 1; }
+echo "[save_map] saved $out.{pgm,yaml,posegraph,data}"

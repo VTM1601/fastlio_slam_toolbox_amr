@@ -1,0 +1,24 @@
+# colcon
+build/
+install/
+log/
+
+# Maps and recordings stay out of git (large, often site-specific)
+*.pgm
+*.posegraph
+*.data
+*.pcd
+*.db3
+*.mcap
+rosbag2_*/
+slam_tbox/
+
+# Videos and raw recordings stay local; the READMEs use the GIFs in docs/media
+*.mp4
+*.webm
+docs/media/raw/
+
+__pycache__/
+*.pyc
+.vscode/
+.idea/
