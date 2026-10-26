@@ -1,7 +1,9 @@
-"""Localization: FAST-LIO2 odometry (odom -> base_link) + slam_toolbox localization on a
-saved pose graph (map -> odom, and /map latched for nav2, so no map_server is needed).
+r"""Localization: FAST-LIO2 odometry (odom -> base_link) + slam_toolbox (map -> odom).
 
-  ros2 launch fastlio_slam_toolbox_amr localization.launch.py \\
+slam_toolbox localizes on a saved pose graph and publishes /map latched for nav2,
+so no map_server is needed.
+
+  ros2 launch fastlio_slam_toolbox_amr localization.launch.py \
     map_file:=~/maps/warehouse start_pose:="1.2 -0.5 1.57" rviz:=true
 
 map_file: pose graph saved by `ros2 run fastlio_slam_toolbox_amr save_map`, without .posegraph.
