@@ -61,7 +61,7 @@ Gồm package này, FAST-LIO2 và driver Livox:
 
 ```bash
 mkdir -p ~/ros2_ws/src && cd ~/ros2_ws/src
-git clone https://github.com/ManhVT1601/fastlio_slam_toolbox_amr.git
+git clone https://github.com/VTM1601/fastlio_slam_toolbox_amr.git
 vcs import --recursive . < fastlio_slam_toolbox_amr/dependencies.repos
 
 # livox_ros_driver2 có cả file ROS 1 và ROS 2: chọn ROS 2
